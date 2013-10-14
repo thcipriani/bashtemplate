@@ -1,0 +1,4 @@
+bashtemplate
+============
+
+Bash script template
