@@ -121,73 +121,55 @@ argument_expected()
     fail "$1 expected an argument"
 }
 
-example_one()
-{
-    uno=$1
-    info "Example One: $1"
-}
-
-example_two()
-{
-    dos=$1
-}
-
 finally()
 {
-    if [ ! -z $uno ]; then
-        info "Finally, Example One: \"$uno\""
+    if [ ! -z $example_one ]; then
+        info "Finally, Example One: \"$example_one\""
     fi
 
-    if [ ! -z $dos ]; then
-        info "Finally, Example Two: \"$dos\""
+    if [ ! -z $example_two ]; then
+        info "Finally, Example Two: \"$example_two\""
     fi
 
 }
 
 check_args()
 {
-    for i in "$@"; do
-        if [ ! -z $callback ]; then
-
-            if [ -z $i ]; then
-                argument_expected $arg
-            fi
-
-            if [[ "$i" =~ ^- ]]; then
-                argument_expected $arg
-            fi
-
-            eval $callback $i
-            callback=
-            continue;
-        fi
-
-        arg="$i"
-
-        case $i in
+    while [ ! -z "$1" ]; do
+        local arg="$1"
+        case "$1" in
             -h|--help) 
-                show_help 0
+                local help=0
+                shift
                 ;; 
             -ex1|--example-one)
-                # Needs additional arguments, provide a callback function
-                callback=example_one
+                shift
+
+                if [ -z $1 ] || [[ "$1" == -* ]]; then
+                    argument_expected $arg
+                fi
+
+                example_one=$1
+                shift
                 ;;
             -ex2|--example-two)
                 # Simple boolean flag–call function here
-                example_two "Two"
+                example_two="Two"
+                shift
                 ;;
             *)
-                error "Unkown option $i" >&2
-                show_help
+                fail "Unkown option $1"
+                shift
                 ;;
         esac
     done
 
-    if [ ! -z $callback ]; then
-        argument_expected $arg
+    if [ ! -z $help ]; then
+        show_help $help
     fi
 
     finally
+
     exit 0
 }
 
@@ -200,4 +182,4 @@ main()
     check_args "$@"
 }
 
-main $@
+main "$@"
